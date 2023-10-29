@@ -20,12 +20,7 @@ class CandidateController extends Controller
         //verify if the authenticated user have access to this candidate
         $user = $request->user();
 
-        if (is_null(Redis::get('user_' . $user->id . '_candidates'))) {
-            $candidates = $user->candidates();
-            Redis::set('user_' . $user->id . '_candidates', json_encode($candidates));
-        } else {
-            $candidates = json_decode(Redis::get('user_' . $user->id . '_candidates'));
-        }
+        $candidates = $user->candidates();
 
         return CandidateResource::collection($candidates)->additional([
             'meta' => [
@@ -86,9 +81,6 @@ class CandidateController extends Controller
         $candidate->owner = $request->get('owner');
         $candidate->created_by = $request->user()->id;
         $candidate->save();
-
-        //if we have new candidates delete the old memory for this redis cache key
-        Redis::del('user_' . $user->id . '_candidates');
 
         return CandidateResource::make($candidate)->additional([
             'meta' => [
