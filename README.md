@@ -7,8 +7,9 @@ La prueba consiste en desarrollar una API Rest con 4 endpoints.
 
 ## Cosas a tener en cuenta sobre esta implementacion
 - Algunas convenciones de laravel no fueron implementadas ya que trate de seguir al maximo las reglas requeridas en el desafio (ejemplo: el estandar de los nombres de rutas y manejo de errores)
-- Realice dos implementaciones del codigo en distintas ramas, una de ellas (`main branch`) la cual posee la implementacion de `REDIS` y la rama `without_redis` la cual no posee dicha implementacion en caso de que no tenga instalado `REDIS` en su maquina
-- Los tests para la rama `main` que tienen implementado Redis solo dan verde para todos los test si posee redis instalado  
+- Realicé dos implementaciones del codigo en distintas ramas, una de ellas (`main branch`) la cual posee la implementacion de `REDIS` y la rama `without_redis` la cual no posee dicha implementacion en caso de que no tenga instalado `REDIS` en su maquina
+- Los tests para la rama `main` que tienen implementado Redis solo dan verde para todos los test si posee redis instalado
+- Si utiliza la rama `without_redis` debe obligatoriamente utilizar el `.env.example` de esa ramma (SESSION_DRIVER=file)
 - Entre las variables de entorno `./env.example` se encuentra una llamada `TOKEN_EXPIRATION_TIME_MIN` la cual permite configurar cuantos `minutos` persiste un token, manipule este valor para comprobar que la expiracion de token realmente funciona (recuerde correr los commandos `php artisan config:clear` despues de cambiar cada valor de la variable)
 - El seeder requerido para la creacion de 2 usuarios con roles diferentes es `database/seeders/DatabaseSeeder.php`
 - Configure su archivo `phpunit.xml` para comenzar a correr los `test`
