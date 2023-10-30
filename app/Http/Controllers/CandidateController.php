@@ -19,12 +19,23 @@ class CandidateController extends Controller
     {
         //verify if the authenticated user have access to this candidate
         $user = $request->user();
+        $candidates = [];
 
-        if (is_null(Redis::get('user_' . $user->id . '_candidates'))) {
+        // we can't use redis here because each agent have his own candidate list
+        //if we try to save a list of candidates for each agent then redis if going to have an overflow of memory (this will happen for big projects)
+        if ($user->hasRole(RoleUtility::AGENT)) {
             $candidates = $user->candidates();
-            Redis::set('user_' . $user->id . '_candidates', json_encode($candidates));
-        } else {
-            $candidates = json_decode(Redis::get('user_' . $user->id . '_candidates'));
+        }
+
+        //we can use redis here because all managers share the same information
+        if ($user->hasRole(RoleUtility::MANAGER)){
+
+            if (is_null(Redis::get('user_candidates'))) {
+                $candidates = $user->candidates();
+                Redis::set('user_candidates', json_encode($candidates));
+            } else {
+                $candidates = json_decode(Redis::get('user_candidates'));
+            }
         }
 
         return CandidateResource::collection($candidates)->additional([
@@ -88,7 +99,7 @@ class CandidateController extends Controller
         $candidate->save();
 
         //if we have new candidates delete the old memory for this redis cache key
-        Redis::del('user_' . $user->id . '_candidates');
+        Redis::del('user_candidates');
 
         return CandidateResource::make($candidate)->additional([
             'meta' => [
