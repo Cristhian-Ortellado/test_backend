@@ -4,13 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCandidateRequest;
 use App\Http\Resources\CandidateResource;
-use App\Models\Candidate;
+use App\Repositories\CandidateRepository;
 use App\Utilities\RoleUtility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 
 class CandidateController extends Controller
 {
+
+    private $candidateRepository;
+
+    public function __construct(CandidateRepository $candidateRepository)
+    {
+        $this->candidateRepository = $candidateRepository;
+    }
+
     /*
      * Return all Candidates resources related to the authenticated user
      *  Users with manager role can access to all candidates resources
@@ -24,17 +32,20 @@ class CandidateController extends Controller
         // we can't use redis here because each agent have his own candidate list
         //if we try to save a list of candidates for each agent then redis if going to have an overflow of memory (this will happen for big projects)
         if ($user->hasRole(RoleUtility::AGENT)) {
-            $candidates = $user->candidates();
+            $candidates = $this->candidateRepository->candidatesForAgent($user->id);
         }
 
         //we can use redis here because all managers share the same information
         if ($user->hasRole(RoleUtility::MANAGER)){
 
             if (is_null(Redis::get('user_candidates'))) {
-                $candidates = $user->candidates();
+                //use repository here
+                $candidates = $this->candidateRepository->all();
                 Redis::set('user_candidates', json_encode($candidates));
+
             } else {
                 $candidates = json_decode(Redis::get('user_candidates'));
+
             }
         }
 
@@ -54,7 +65,7 @@ class CandidateController extends Controller
      * */
     public function show(Request $request, $id)
     {
-        $candidate = Candidate::find($id);
+        $candidate = $this->candidateRepository->findById($id);
 
         if (is_null($candidate)) {
             return response()->json([
@@ -90,13 +101,13 @@ class CandidateController extends Controller
     public function store(StoreCandidateRequest $request)
     {
         $user = $request->user();
-        $candidate = new Candidate();
 
-        //fill data
-        $candidate->fill($request->only('name', 'source'));
-        $candidate->owner = $request->get('owner');
-        $candidate->created_by = $request->user()->id;
-        $candidate->save();
+        $candidate = $this->candidateRepository->create(
+            array_merge(
+                $request->only('name', 'source','owner'),
+                ['created_by' =>$user->id]
+            )
+        );
 
         //if we have new candidates delete the old memory for this redis cache key
         Redis::del('user_candidates');
