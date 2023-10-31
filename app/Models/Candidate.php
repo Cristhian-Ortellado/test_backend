@@ -9,7 +9,7 @@ class Candidate extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'source'];
+    protected $guarded =['id'];
 
     public function owner()
     {

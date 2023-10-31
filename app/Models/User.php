@@ -44,25 +44,11 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'last_login' =>'datetime'
+        'last_login' => 'datetime'
     ];
 
-    public function hasRole($role):bool
+    public function hasRole($role): bool
     {
-        return is_array($role) ? in_array($this->role,$role) :  $this->role == $role;
-    }
-
-    public function candidates()
-    {
-        $query = Candidate::query();
-
-        if ($this->hasRole(RoleUtility::AGENT)){
-            $query->where('owner',$this->id);
-
-        }else if ($this->hasRole(RoleUtility::MANAGER)){
-            //we dont have rules for this role
-        }
-
-        return $query->get();
+        return is_array($role) ? in_array($this->role, $role) : $this->role == $role;
     }
 }

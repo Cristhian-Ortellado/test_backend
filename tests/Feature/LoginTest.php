@@ -10,6 +10,7 @@ use Tests\TestCase;
 class LoginTest extends TestCase
 {
     use RefreshDatabase;
+
     /**
      * @test
      * @return void
@@ -22,12 +23,12 @@ class LoginTest extends TestCase
 
         $response = $this->post(route('login'), $body, self::headers());
 
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertExactJson([
-                'meta' => [
-                    'success' => false,
-                    'errors' => ['Username and password are required']
-                ]
+                'errors' => [
+                    'username' => ['The username field is required.']
+                ],
+                'message' => "The username field is required.",
             ]);
     }
 
@@ -43,12 +44,12 @@ class LoginTest extends TestCase
 
         $response = $this->post(route('login'), $body, self::headers());
 
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertExactJson([
-                'meta' => [
-                    'success' => false,
-                    'errors' => ['Username and password are required']
-                ]
+                'errors' => [
+                    'password' => ['The password field is required.']
+                ],
+                'message' => "The password field is required.",
             ]);
     }
 
@@ -134,7 +135,7 @@ class LoginTest extends TestCase
         $oldLastLogin = $user->last_login;
         $currentLastLogin = $user->refresh()->last_login;
 
-        self::assertNotEquals($oldLastLogin,$currentLastLogin);
+        self::assertNotEquals($oldLastLogin, $currentLastLogin);
     }
 
 

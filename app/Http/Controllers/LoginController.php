@@ -2,54 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginUserRequest;
+use App\Http\Resources\LoginInvalidResource;
+use App\Http\Resources\LoginSuccessResource;
 use App\Models\User;
+use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    public function login(Request $request)
+    private $userRepository;
+    public function __construct(UserRepositoryInterface $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
+    public function login(LoginUserRequest $request)
     {
         //validate fields
         $username = $request->input('username');
         $password = $request->input('password');
 
-        //use this way because we don't have a format defined (I used to use form requests)
-        if (is_null($username) || is_null($password)) {
-            return response()->json([
-                "meta" => [
-                    "success" => false,
-                    "errors" => ["Username and password are required"]
-                ]
-            ], 400);
-        }
-
         //try to login
         if (Auth::attempt(['username' => $username, 'password' => $password])) {
-            $user = User::where('username', $username)->first();
+            $user = $this->userRepository->findByUsername($username);
 
             //update last login
             $user->last_login = now();
             $user->save();
 
-            return response()->json([
-                'meta' => [
-                    'success' => true,
-                    'errors' => []
-                ],
-                'data' => [
-                    'token' => $user->createToken("Bearer", ['*'], now()->minutes(config('app.TOKEN_EXPIRATION_TIME_MIN')))->plainTextToken,
-                    'minutes_to_expire' => config('app.TOKEN_EXPIRATION_TIME_MIN')
-                ]
-            ]);
+            return LoginSuccessResource::make($user);
         };
 
         //return Invalid Credentials instead of the username of the user because client never should know if the user exists or not
-        return response()->json([
-            "meta" => [
-                'success' => false,
-                'errors' => ["Invalid Credentials"]
-            ]
-        ], 401);
+        return LoginInvalidResource::make(['errors'=>["Invalid Credentials"]])
+            ->response()
+            ->setStatusCode(401);
     }
 }

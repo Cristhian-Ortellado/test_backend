@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Utilities\RoleUtility;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Redis;
 use Tests\TestCase;
 
 class LeadTest extends TestCase
