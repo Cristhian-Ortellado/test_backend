@@ -3,8 +3,9 @@
 namespace App\Repositories;
 
 use App\Models\Candidate;
+use App\Repositories\Interfaces\CandidateRepositoryInterface;
 
-class CandidateRepository
+class CandidateRepository implements CandidateRepositoryInterface
 {
 
     public function findById($id)

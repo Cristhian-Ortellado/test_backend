@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCandidateRequest;
 use App\Http\Resources\CandidateResource;
 use App\Repositories\CandidateRepository;
+use App\Repositories\Interfaces\CandidateRepositoryInterface;
 use App\Utilities\RoleUtility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -14,7 +15,7 @@ class CandidateController extends Controller
 
     private $candidateRepository;
 
-    public function __construct(CandidateRepository $candidateRepository)
+    public function __construct(CandidateRepositoryInterface $candidateRepository)
     {
         $this->candidateRepository = $candidateRepository;
     }

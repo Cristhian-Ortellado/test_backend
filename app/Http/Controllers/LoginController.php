@@ -6,6 +6,7 @@ use App\Http\Requests\LoginUserRequest;
 use App\Http\Resources\LoginInvalidResource;
 use App\Http\Resources\LoginSuccessResource;
 use App\Models\User;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 class LoginController extends Controller
 {
     private $userRepository;
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepositoryInterface $userRepository)
     {
         $this->userRepository = $userRepository;
     }
